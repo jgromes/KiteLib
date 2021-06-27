@@ -246,7 +246,13 @@ int16_t nRF24::setFrequency(int16_t freq) {
 
   // set frequency
   uint8_t freqRaw = freq - 2400;
-  return(_mod->SPIsetRegValue(NRF24_REG_RF_CH, freqRaw, 6, 0));
+  uint16_t state = _mod->SPIsetRegValue(NRF24_REG_RF_CH, freqRaw, 6, 0);
+
+  if(state == ERR_NONE) {
+    _freq = freq;
+  }
+
+  return(state);
 }
 
 int16_t nRF24::setDataRate(int16_t dataRate) {
@@ -266,6 +272,10 @@ int16_t nRF24::setDataRate(int16_t dataRate) {
     state |= _mod->SPIsetRegValue(NRF24_REG_RF_SETUP, NRF24_DR_2_MBPS, 3, 3);
   } else {
     return(ERR_INVALID_DATA_RATE);
+  }
+
+  if(state == ERR_NONE) {
+    _dataRate = dataRate;
   }
 
   return(state);
@@ -297,6 +307,11 @@ int16_t nRF24::setOutputPower(int8_t power) {
 
   // write new register value
   state = _mod->SPIsetRegValue(NRF24_REG_RF_SETUP, powerRaw, 2, 1);
+
+  if(state == ERR_NONE) {
+    _power = power;
+  }
+
   return(state);
 }
 
@@ -325,8 +340,9 @@ int16_t nRF24::setAddressWidth(uint8_t addrWidth) {
       return(ERR_INVALID_ADDRESS_WIDTH);
   }
 
-  // save address width
-  _addrWidth = addrWidth;
+  if(state == ERR_NONE) {
+    _addrWidth = addrWidth;
+  }
 
   return(state);
 }

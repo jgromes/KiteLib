@@ -432,6 +432,16 @@
 #define RF69_PA2_NORMAL                               0x70        //  7     0     PA_BOOST: none
 #define RF69_PA2_20_DBM                               0x7C        //  7     0               +20 dBm
 
+// Defaults
+#define RF69_DEFAULT_FREQ                             434.0
+#define RF69_DEFAULT_BR                               48.0
+#define RF69_DEFAULT_FREQDEV                          50.0
+#define RF69_DEFAULT_RXBW                             125.0
+#define RF69_DEFAULT_POWER                            10
+#define RF69_DEFAULT_PREAMBLELEN                      16
+#define RF69_DEFAULT_SW                               {0x12, 0xAD}
+#define RF69_DEFAULT_SW_LEN                           2
+
 /*!
   \class RF69
 
@@ -471,7 +481,13 @@ class RF69: public PhysicalLayer {
 
       \returns \ref status_codes
     */
-    int16_t begin(float freq = 434.0, float br = 48.0, float freqDev = 50.0, float rxBw = 125.0, int8_t power = 10, uint8_t preambleLen = 16);
+    int16_t begin(
+      float freq = RF69_DEFAULT_FREQ,
+      float br = RF69_DEFAULT_BR,
+      float freqDev = RF69_DEFAULT_FREQDEV,
+      float rxBw = RF69_DEFAULT_RXBW,
+      int8_t power = RF69_DEFAULT_POWER,
+      uint8_t preambleLen = RF69_DEFAULT_PREAMBLELEN);
 
     /*!
       \brief Reset method. Will reset the chip to the default state using RST pin.
@@ -892,20 +908,22 @@ class RF69: public PhysicalLayer {
   protected:
 #endif
 
-    float _freq = 0;
-    float _br = 0;
-    float _rxBw = 0;
-    bool _ook = false;
-    int16_t _tempOffset = 0;
-    int8_t _power = 0;
+    float _freq = RF69_DEFAULT_FREQ;
+    float _br = RF69_DEFAULT_BR;
+    float _freqDev = RF69_DEFAULT_FREQDEV;
+    float _rxBw = RF69_DEFAULT_RXBW;
+    int8_t _power = RF69_DEFAULT_POWER;
+    uint8_t _preambleLen = RF69_DEFAULT_PREAMBLELEN;
 
     size_t _packetLength = 0;
     bool _packetLengthQueried = false;
     uint8_t _packetLengthConfig = RF69_PACKET_FORMAT_VARIABLE;
 
     bool _promiscuous = false;
+    bool _ook = false;
+    int16_t _tempOffset = 0;
 
-    uint8_t _syncWordLength = 2;
+    uint8_t _syncWordLength = RF69_DEFAULT_SW_LEN;
 
     int16_t config();
     int16_t directMode();

@@ -85,7 +85,8 @@ int16_t CC1101::begin(float freq, float br, float freqDev, float rxBw, int8_t po
   RADIOLIB_ASSERT(state);
 
   // set default sync word
-  state = setSyncWord(0x12, 0xAD, 0, false);
+  uint8_t sw[2] = CC1101_DEFAULT_SW;
+  state = setSyncWord(sw[0], sw[1], 0, false);
   RADIOLIB_ASSERT(state);
 
   // flush FIFOs
@@ -462,8 +463,9 @@ int16_t CC1101::setBitRate(float br) {
   // set bit rate value
   int16_t state = SPIsetRegValue(CC1101_REG_MDMCFG4, e, 3, 0);
   state |= SPIsetRegValue(CC1101_REG_MDMCFG3, m);
+
   if(state == ERR_NONE) {
-    CC1101::_br = br;
+    _br = br;
   }
   return(state);
 }
@@ -480,7 +482,13 @@ int16_t CC1101::setRxBandwidth(float rxBw) {
       float point = (CC1101_CRYSTAL_FREQ * 1000000.0)/(8 * (m + 4) * ((uint32_t)1 << e));
       if((fabs(rxBw * 1000.0) - point) <= 1000) {
         // set Rx channel filter bandwidth
-        return(SPIsetRegValue(CC1101_REG_MDMCFG4, (e << 6) | (m << 4), 7, 4));
+        uint16_t state = SPIsetRegValue(CC1101_REG_MDMCFG4, (e << 6) | (m << 4), 7, 4);
+
+        if(state == ERR_NONE) {
+          _rxBw = rxBw;
+        }
+
+        return(state);
       }
     }
   }
@@ -508,6 +516,11 @@ int16_t CC1101::setFrequencyDeviation(float freqDev) {
   // set frequency deviation value
   int16_t state = SPIsetRegValue(CC1101_REG_DEVIATN, (e << 4), 6, 4);
   state |= SPIsetRegValue(CC1101_REG_DEVIATN, m, 2, 0);
+
+  if(state == ERR_NONE) {
+    _freqDev = freqDev;
+  }
+
   return(state);
 }
 
@@ -599,8 +612,6 @@ int16_t CC1101::setSyncWord(uint8_t* syncWord, uint8_t len, uint8_t maxErrBits, 
     }
   }
 
-  _syncWordLength = len;
-
   // enable sync word filtering
   int16_t state = enableSyncWordFiltering(maxErrBits, requireCarrierSense);
   RADIOLIB_ASSERT(state);
@@ -608,6 +619,10 @@ int16_t CC1101::setSyncWord(uint8_t* syncWord, uint8_t len, uint8_t maxErrBits, 
   // set sync word register
   state = SPIsetRegValue(CC1101_REG_SYNC1, syncWord[0]);
   state |= SPIsetRegValue(CC1101_REG_SYNC0, syncWord[1]);
+
+  if(state == ERR_NONE) {
+    _syncWordLength = len;
+  }
 
   return(state);
 }
@@ -649,8 +664,13 @@ int16_t CC1101::setPreambleLength(uint8_t preambleLength) {
       return(ERR_INVALID_PREAMBLE_LENGTH);
   }
 
+  uint16_t state = SPIsetRegValue(CC1101_REG_MDMCFG1, value, 6, 4);
 
-  return SPIsetRegValue(CC1101_REG_MDMCFG1, value, 6, 4);
+  if(state == ERR_NONE) {
+    _preambleLen = preambleLength;
+  }
+
+  return(state);
 }
 
 

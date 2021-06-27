@@ -498,6 +498,16 @@
 #define CC1101_GDO2_ACTIVE                            0b00000100  //  2     2     GDO2 is active/asserted
 #define CC1101_GDO0_ACTIVE                            0b00000001  //  0     0     GDO0 is active/asserted
 
+// Defaults
+#define CC1101_DEFAULT_FREQ                           434.0
+#define CC1101_DEFAULT_BR                             48.0
+#define CC1101_DEFAULT_FREQDEV                        48.0
+#define CC1101_DEFAULT_RXBW                           135.0
+#define CC1101_DEFAULT_POWER                          10
+#define CC1101_DEFAULT_PREAMBLELEN                    16
+#define CC1101_DEFAULT_SW                             {0x12, 0xAD}
+#define CC1101_DEFAULT_SW_LEN                         2
+
 /*!
   \class CC1101
 
@@ -929,9 +939,13 @@ class CC1101: public PhysicalLayer {
   #if !defined(RADIOLIB_GODMODE)
     protected:
   #endif
+    float _freq = CC1101_DEFAULT_FREQ;
+    float _br = CC1101_DEFAULT_BR;
+    float _freqDev = CC1101_DEFAULT_FREQDEV;
+    float _rxBw = CC1101_DEFAULT_RXBW;
+    int8_t _power = CC1101_DEFAULT_POWER;
+    uint8_t _preambleLen = CC1101_DEFAULT_PREAMBLELEN;
 
-    float _freq = 0;
-    float _br = 0;
     uint8_t _rawRSSI = 0;
     uint8_t _rawLQI = 0;
     uint8_t _modulation = CC1101_MOD_FORMAT_2_FSK;
@@ -943,8 +957,7 @@ class CC1101: public PhysicalLayer {
     bool _promiscuous = false;
     bool _crcOn = true;
 
-    uint8_t _syncWordLength = 2;
-    int8_t _power = 0;
+    uint8_t _syncWordLength = CC1101_DEFAULT_SW_LEN;
 
     int16_t config();
     int16_t directMode();
